@@ -139,7 +139,7 @@ ___x_cmd_gcode_project_update(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
 options:
-    #1|--project|--id                                      "The ID or URL-encoded path of the project."      <>:RepoName
+    #1|--project|--id                                   "The ID or URL-encoded path of the project."      <>:RepoName
     --allow_merge_on_skipped_pipeline                   "Set whether or not merge requests can be merged with skipped jobs."
     --analytics_access_level                            "One of disabled, private or enabled"                                                                                                           <>="disabled"
     --approvals_before_merge                            "How many approvers should approve merge request by default. "                                                                                  <>:Number=" "
@@ -177,7 +177,6 @@ options:
     --mirror                                            "Enables pull mirroring in a project"
     --mr_default_target_self                            "For forked projects, target merge requests to this project. If false, the target will be the upstream project"
     --name                                              "The name of the project"                                                                                                                       <>=""
-    --naonly_allow_merge_if_all_discussions_            are_resolvedme    "only_allow_merge_if_all_discussions_are_resolved"
     --only_allow_merge_if_pipeline_succeeds             "Set whether merge requests can only be merged with successful jobs."
     --only_mirror_protected_branches                    "Only mirror protected branches."
     --operations_access_level                           "One of disabled, private, or enabled"                                                                                                          <>=""
@@ -197,7 +196,6 @@ options:
     --service_desk_enabled                              "Enable or disable Service Desk feature."
     --shared_runners_enabled                            "Enable shared runners for this project."
     --snippets_access_level                             "One of disabled, private, or enabled"                                                                                                          <>=""
-    --snippets_enabled                                  "(Deprecated) Enable snippets for this project. Use instead. snippets_access_level"
     --snippets_enabled                                  "(Deprecated) Enable snippets for this project. Use instead. snippets_access_level"
     --squash_commit_template                            "Template used to create squash commit message in merge requests"                                                                               <>=""
     --squash_option                                     "One of never, always, default_on, or default_off"                                                                                              <>=""

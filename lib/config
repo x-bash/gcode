@@ -26,7 +26,7 @@ ___x_cmd_gcode_config_get(){
 type:
     ConfigName  =   oauth_token user git_protocol
 options:
-    --host        "host name"                               <>="gitlab.com"
+    --host        "host name"                               <>="gitcode.net"
     #1            "The name of the configuration to get"    <>:ConfigName
 '
     param:run
@@ -41,7 +41,7 @@ ___x_cmd_gcode_config_set(){
 type:
     ConfigName  =   oauth_token user git_protocol
 options:
-    --host    "host name"                             <>="gitlab.com"
+    --host    "host name"                             <>="gitcode.net"
     #1        "Please provide configuration key"      <>:ConfigName
     #2        "Please provide configuration val"      <>
 '

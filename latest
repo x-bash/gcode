@@ -38,7 +38,7 @@ ___x_cmd_gcode_make(){
 
     local O="___x_cmd_gcode_${1:?Provide client name by O environment}"
 
-    ___x_cmd_http make  'https://gitlab.com/api/v4'
+    ___x_cmd_http make  'https://gitcode.net/api/v4'
     ___x_cmd_http header put type  "application/json;charset=utf-8"
 
     local token
@@ -55,7 +55,7 @@ ___x_cmd_gcode_make(){
     info=$(printf "\n%s %s \n%s" \
          "$(___x_cmd_ui yellow 'You need run command to add token:')" \
          "$(___x_cmd_ui bold cyan "\`gcode token <token>\`")" \
-         "$(___x_cmd_ui 'https://gitlab.com/-/profile/personal_access_tokens')")
+         "$(___x_cmd_ui 'https://gitcode.net/-/profile/personal_access_tokens')")
     gcode_log warn "Token is null.${info}"
 }
 

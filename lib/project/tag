@@ -54,7 +54,6 @@ options:
 }
 
 # shellcheck disable=SC2181,SC2154
-# https://gitlab.com/api/swagger#/putV5projectsOwnerprojectCollaboratorsUsername
 ___x_cmd_gcode_project_tag_create(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -97,7 +96,7 @@ ___x_cmd_gcode_project_tag_add_json_status_handler(){
 }
 
 # shellcheck disable=SC2181
-# https://gitlab.com/api/swagger#/deleteV5projectsOwnerprojectCollaboratorsUsername
+# https://gitcode.net/api/swagger#/deleteV5projectsOwnerprojectCollaboratorsUsername
 ___x_cmd_gcode_project_tag_rm(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
