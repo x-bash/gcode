@@ -27,26 +27,26 @@ ___x_cmd_gcode_project_create(){
 option:
     #1                                                  "project names"                                                                     <>:RepoName
     -p|--path                                           "project path"                                                                      <>=""
-    --topics                                            "The list of topics for a project"                                                  <>:Array=""
-    --avatar                                            "Image file for avatar of the project."                                             <>=""
-    --tag_list                                          "The list of tags for a project"                                                    <>:Array=""
-    --import_url                                        "URL to import repository from."                                                    <>=""
-    --visibility                                        "See project visibility level."                                                     <>=""
-    --description                                       "Short project description."                                                        <>=""
-    --merge_method                                      "Set the merge method used."                                                        <>=""
     --namespace_id                                      "Namespace for the new project"                                                     <>=""
-    --build_timeout                                     "The maximum amount of time, in seconds, that a job can run."                       <>:Number=""
-    --squash_option                                     "One of never, always, default_on, or default_off."                                 <>=""
-    --template_name                                     "When used without use_custom_template, name of a built-in project template."       <>=""
-    --ci_config_path                                    "The path to CI configuration file."                                                <>=""
+    --access                                            "See project visibility level."                                                     <>="" = public private
     --default_branch                                    "The default branch name."                                                          <>=""
-    --wiki_access_level                                 "wiki access level"                                                                 <>=""
-    --build_git_strategy                                "The Git strategy. Defaults to fetch."                                              <>=""
+    --description                                       "Short project description."                                                        <>=""
+    --template_name                                     "When used without use_custom_template, name of a built-in project template."       <>=""
+    --tag_list                                          "The list of tags for a project"                                                    <>:Array=""
+    --template_project_id                               "When used with use_custom_template, project ID of a custom project template."      <>:Number=""
     --repository_storage                                "Which storage shard the repository is on."                                         <>=""
     --pages_access_level                                "Pages access level"                                                                <>=""
     --issues_access_level                               "Issues access level"                                                               <>=""
+    --import_url                                        "URL to import repository from."                                                    <>=""
+    --merge_method                                      "Set the merge method used."                                                        <>=""
+    --build_timeout                                     "The maximum amount of time, in seconds, that a job can run."                       <>:Number=""
+    --squash_option                                     "One of never, always, default_on, or default_off."                                 <>=""
+    --ci_config_path                                    "The path to CI configuration file."                                                <>=""
+    --wiki_access_level                                 "wiki access level"                                                                 <>=""
+    --build_git_strategy                                "The Git strategy. Defaults to fetch."                                              <>=""
+    --topics                                            "The list of topics for a project"                                                  <>:Array=""
+    --avatar                                            "Image file for avatar of the project."                                             <>=""
     --builds_access_level                               "One of disabled, private, or enabled."                                             <>=""
-    --template_project_id                               "When used with use_custom_template, project ID of a custom project template."      <>:Number=""
     --forking_access_level                              "One of disabled, private, or enabled."                                             <>=""
     --snippets_access_level                             "Snippets access level"                                                             <>=""
     --analytics_access_level                            "One of disabled, private or enabled"                                               <>=""
@@ -93,9 +93,10 @@ option:
     [ $# -ne 0 ] || { gcode_log error "Please provide project name"; return 1; }
     local gcode_path="$1"
     [ -z "$p" ] || gcode_path="$p"
+    [ -n "$access" ] || unset access
     local name="$1"
     local gen_gcode_json
-    gen_gcode_json="$(param:option2json +name -p path=gcode_path)"
+    gen_gcode_json="$(param:option2json ${access+"visibility=access"} +name -p path=gcode_path)"
     ___x_cmd_gcode_http post "/projects" "$gen_gcode_json" | ___x_cmd_gcode_project_create_status_handler
 }
 
@@ -106,7 +107,7 @@ ___x_cmd_gcode_project_create_status_handler(){
         return
     fi
 
-    ___x_cmd_git_json_query_rename project_id=.id url=.web_url project_owner=.owner.username
+    x jo env . project_id=.id url=.web_url project_owner=.owner.username
     if [ -n "$project_id" ]; then
         ___x_cmd_ui_tf true  "Creating project $name successfully" "project_id: $project_id" "project_owner: $project_owner" "url: $url"
     else
@@ -126,9 +127,8 @@ options:
 '
     param:run
     ___x_cmd_gcode_current_owner 1>/dev/null
-    ___gcode_ui_mutual  ___x_cmd_gcode_get_multi "/users/$___X_CMD_GCODE_DEFAULT_OWNER/projects"  <<A
-    ___ui_table_json Id=.id Name=.name Owner=.owner.username Url=.web_url -- \$@
-A
+    ___gcode_ui_mutual '___ui_table_json Id=.id Name=.name Owner=.owner.username Url=.web_url' \
+        ___x_cmd_gcode_get_multi "/users/$___X_CMD_GCODE_DEFAULT_OWNER/projects"
 }
 # EndSection
 
@@ -220,7 +220,7 @@ ___x_cmd_gcode_project_update_status_handler(){
         return
     fi
 
-    ___x_cmd_git_json_query_rename url=.web_url
+    x jo env . url=.web_url
     if [ -n "$url" ]; then
         ___x_cmd_ui_tf true     "Update $name successfully" "url: $url"
     else
@@ -251,7 +251,7 @@ ___x_cmd_gcode_repo_info_status_handler() {
         return
     fi
 
-    ___x_cmd_git_json_query_rename id=.id name=.name default_branch=.default_branch web_url=.web_url
+    x jo env . id=.id name=.name default_branch=.default_branch web_url=.web_url
     if [ -n "$id" ]; then
         ___x_cmd_ui_tf true    "Success" "id: $id" "name:$name" "default_branch: $default_branch" "url: $web_url"
     else

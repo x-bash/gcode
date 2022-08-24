@@ -23,7 +23,9 @@ ___x_cmd_gcode_current_owner(){
         fi
         return
     elif [ -z "$___X_CMD_GCODE_DEFAULT_OWNER" ];then
-        ___x_cmd_gcode_http get "/user" |  x jo env . ___X_CMD_GCODE_DEFAULT_OWNER=.username
+        x jo env . ___X_CMD_GCODE_DEFAULT_OWNER=.username<<A
+        $(___x_cmd_gcode_http get "/user")
+A
         if [ -z "$___X_CMD_GCODE_DEFAULT_OWNER" ];then
             gcode_log error "get current owner fail"
             return 1

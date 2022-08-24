@@ -38,7 +38,7 @@ options:
     [ ! -t 1 ] && printf "%s" "$data" && return 0
     printf "%s" "$data" \ |
     {
-        ___x_cmd_git_json_query_rename name=.username email=.email web_url=.web_url state=.state
+        x jo env . name=.username email=.email web_url=.web_url state=.state
         if [ -n "$name" ]; then
              ___x_cmd_ui_tf true    "Success" "name: $name" "email: $email" "url: $web_url" "state: $state"
              return 0

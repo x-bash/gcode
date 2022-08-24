@@ -104,7 +104,7 @@ options:
 
     ___x_cmd_gcode_http get "/groups/${1:?Provide groups ID or path}" | \
     {
-        ___x_cmd_git_json_query_rename id=.id name=.name dir=.path visibility=.visibility url=.web_url
+        x jo env . id=.id name=.name dir=.path visibility=.visibility url=.web_url
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true   "Success" "id: $id" "name: $name" "path: $dir" "visibility: $visibility" "url: $url"
         else
@@ -139,7 +139,7 @@ options:
 
     ___x_cmd_gcode_http post "/groups" "$gen_gcode_json" | \
     {
-        ___x_cmd_git_json_query_rename id=.id
+        x jo env . id=.id
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true   "Creating groups Successfully"
         else
@@ -167,7 +167,7 @@ options:
     gen_gcode_json="$(param:option2json -subgroup_path path=group_path)"
     ___x_cmd_gcode_http post "/groups" "$gen_gcode_json"| \
     {
-        ___x_cmd_git_json_query_rename id=.id
+        x jo env . id=.id
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true   "Creating groups Successfully"
         else
@@ -199,7 +199,7 @@ options:
 
     ___x_cmd_gcode_http put "/groups/$1" "$gen_gcode_json" | \
     {
-        ___x_cmd_git_json_query_rename id=.id
+        x jo env . id=.id
         if [ -n "$id" ]; then
             ___x_cmd_ui_tf true   "Update groups Successfully"
         else

@@ -116,15 +116,17 @@ _____x_cmd_git_repo(){
     repo="${repo%.*}"
     printf "%s" "$repo"
 }
-___gcode_ui_mutual(){
-    if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ] ; then
-        "$@"
-    else
-        # run ui table
-        eval "$(cat)"
-    fi
 
-    local ___gcode_exit_code="$?"
-    [ "$___gcode_exit_code" -eq 0 ] || gcode_log error "${___gcode_error_msg:-"Couldn't find any data"}"
-    return "$___gcode_exit_code"
+___gcode_ui_mutual() {
+    local tmp="$1"
+    shift 1
+    if [ -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
+        if ! eval "$tmp -- \$@"  && [ -n "$___gh_error_msg" ]; then
+            ___x_cmd_ui_tf false "$___gh_error_msg"
+            return 1
+        fi
+    else
+        "$@"
+    fi
+    return
 }

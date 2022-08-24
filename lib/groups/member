@@ -43,7 +43,7 @@ options:
 
     ___x_cmd_gcode_http get "/groups/$id/members/$user_id" | \
     {
-        ___x_cmd_git_json_query_rename username=.username url=.web_url email=.email
+        x jo env . username=.username url=.web_url email=.email
         if [ -n "$username" ]; then
              ___x_cmd_ui_tf true  "Success" "username: $username" "url: $url" "email: $email"
              return 0
