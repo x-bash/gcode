@@ -40,7 +40,7 @@ Dreamweaver
 Dropbox
 Drupal
 EPiServer
-Eagcodee
+Eagle
 Eclipse
 EiffelStudio
 Elisp

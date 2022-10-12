@@ -1,46 +1,124 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
+# shellcheck disable=SC2046
 
-############################
-# Section 2: Wrapping std/http module with object naming changing
-############################
+# Section: HTTP header & body & request
 ___x_cmd_gcode_resp_header(){
-    O="${O:-___X_BASH_HTTP____x_cmd_gcode_GCODE_DEFAULT}" ___x_cmd_http_resp header "$@"
+   cat "$___X_CMD_ROOT_TMP/gcode/.____x_cmd_gcode_curl_header"
 }
 
-# TODO: Not supported yet
-___x_cmd_gcode_resp_body(){
-    O="${O:-___X_BASH_HTTP____x_cmd_gcode_GCODE_DEFAULT}" ___x_cmd_http_resp body "$@"
+# TODO:HTTP CODE
+______x_cmd_gcode_resp_header_code(){
+    ___x_cmd_gcode_resp_header  | awk '$1 ~/HTTP\/2$/ {print ($2+0);exit(0)}'
 }
 
+___x_cmd_gcode_curl(){
+    local op="$1"
+    local url="\"https://gitcode.net/api/v4$2\""
+    local gcode_header="$___X_CMD_ROOT_TMP/gcode/.____x_cmd_gcode_curl_header"
+    local Type="\"Content-Type: application/json\""
+    local Authorization
+    Authorization="\"PRIVATE-TOKEN: $(___x_cmd_gcode_token)\""
+    shift 2
+    local req
+    case "$op" in
+        get)
+            gcode_log debug           "eval x curl -D  $gcode_header   -X GET -s -H  $Type  -H  $Authorization  $(eval "printf '%s ' $(x curl gencode -G $([ $# -eq 0 ] || printf "%s== " "$@"))")  $url"
+            x ccmd 3m --            eval x curl -D "$gcode_header"  -X GET -s -H "$Type" -H "$Authorization" $(eval "printf '%s ' $(x curl gencode -G $([ $# -eq 0 ] || printf "%s== " "$@"))") "$url"
+            ___x_cmd_gcode_http_error  eval x curl -D "$gcode_header"  -X GET -s -H "$Type" -H "$Authorization" $(eval "printf '%s ' $(x curl gencode -G $([ $# -eq 0 ] || printf "%s== " "$@"))") "$url"
+            return
+            ;;
+        post)
+            req="POST";;
+        put)
+            req="PUT";;
+        patch)
+            req="PATCH";;
+        delete)
+            req="DELETE";;
+    esac
+    gcode_log debug "eval x curl -D $gcode_header -X $req    -s -H $Type -H $Authorization $(x curl gencode "$@") $url"
+
+    eval x curl -D "$gcode_header" -X "$req"    -s -H "$Type" -H "$Authorization" "$(x curl gencode "$@")" "$url"
+}
+
+___x_cmd_gcode_http_error(){
+    local http_resp_code
+    http_resp_code=$(______x_cmd_gcode_resp_header_code)
+    if [ -n "$http_resp_code" ] && [ "$http_resp_code" -ge 200 ] && [ "$http_resp_code" -le 303 ]; then
+        return 0
+    else
+        [ $# -eq 0 ] || x ccmd invalidate "$@" >/dev/null
+        gcode_log error "HTTP Code Is $http_resp_code"
+        return 1
+    fi
+}
+# EndSection
+
+# Section: pagination
 ___x_cmd_gcode_get_multi() {
     if [ -n "$page" ] || [ -n "$per_page" ]; then
-        ___x_cmd_gcode_http get "$@" page per_page
+        ___x_cmd_gcode_curl get "$@" page per_page
         return
     fi
-    local tmp
-    tmp=$(mktemp)
-    ___x_cmd_gcode_http get "$@" page=1 per_page=100 >> "$tmp"
+
+    local page=1
+    local per_page=100
+    if [ -n "$json" ] || [ -n "$ENFORCE_JSON" ]; then
+        ___x_cmd_gcode_get_multi___json_prt "$@"
+    else
+        ___x_cmd_gcode_get_multi___ui_table "$@"
+    fi
+
+}
+
+___x_cmd_gcode_get_multi___ui_table(){
+    ___x_cmd_gcode_curl get "$@" page per_page
+    printf "\n"
     local next_url
     _____x_cmd_gcode_next_url
-    if [ -z "$next_url" ];then
+    [ -n "$next_url" ] || return
+
+    while [ -n "$next_url" ]; do
+        ___x_cmd_gcode_curl get "$next_url"
+        printf "\n"
+        _____x_cmd_gcode_next_url
+    done
+}
+
+___x_cmd_gcode_get_multi___json_prt(){
+    local tmp
+    tmp=$(mktemp)
+    ___x_cmd_gcode_curl get "$@" page per_page > "$tmp"
+    printf "\n" >> "$tmp"
+
+    local next_url
+    _____x_cmd_gcode_next_url
+    if [ -z "$next_url" ]; then
         cat "$tmp"
         rm "$tmp"
         return
     fi
+
     while [ -n "$next_url" ]; do
-        ___x_cmd_gcode_http get "$next_url" >> "$tmp"
+        ___x_cmd_gcode_curl get "$next_url" >> "$tmp"
+        printf "\n" >> "$tmp"
         _____x_cmd_gcode_next_url
     done
-    x ja 'BEGIN{print "["} END{print "]"}O[1]{
-    if ((V == "}") || (V == "]") || (K ~ "^[0-9]+$")) print V
-    else print K ": "V;
-    }' < "$tmp" | x jo fmt
+    < "$tmp" x jo q0 \*.\* . | awk 'BEGIN{ print "["}
+        END{ print "]"}
+        {
+            if ($0 == "") next
+            if ((NR != 1) && ( aaa == 0 )) print ","
+            if (($0 == "{") || ( $0 == "[")) aaa++
+            if (($0 == "}") || ( $0 == "]")) aaa--
+            print $0
+        }'
     rm "$tmp"
 }
 
 _____x_cmd_gcode_next_url(){
-    next_url="$(___x_cmd_gcode_resp_header "link")"
+    next_url="$(grep "link:" "$___X_CMD_ROOT_TMP/gcode/.____x_cmd_gcode_curl_header")"
     next_url="${next_url#*'rel="prev", <'}"
     local tmp_url="${next_url%%'>; rel="next"'*}"
     if [ "$next_url" != "$tmp_url" ];then
@@ -49,25 +127,16 @@ _____x_cmd_gcode_next_url(){
         next_url=""
     fi
 }
+# EndSection
 
-___x_cmd_gcode_http(){
-    if ! O="${O:-___x_cmd_gcode_GCODE_DEFAULT}" ___x_cmd_http header get Content-Type 1>/dev/null 2>&1; then
-         O="${O:-___x_cmd_gcode_GCODE_DEFAULT}" ___x_cmd_http header put Content-Type application/json
-    fi
-    O="${O:-___x_cmd_gcode_GCODE_DEFAULT}" ___x_cmd_http "$@"
-}
-
-############################
 # Section 3: Parameter Utilities
-############################
-
 alias ___x_cmd_gcode_param_init_owner_project='
     local owner_project
     ___x_cmd_gcode_param_normalize_repo  || return
 '
 
 ___x_cmd_gcode_param_normalize_repo(){
-    local op="$repo"
+    local op="$project"
     [ -z "$op" ] && op="$1"
     case "$op" in
     */*)
@@ -78,34 +147,13 @@ ___x_cmd_gcode_param_normalize_repo(){
         ;;
     *)
         ___x_cmd_gcode_current_owner 1>/dev/null
-        if [ -z "$___X_CMD_GCODE_DEFAULT_OWNER" ]; then
+        if [ -z "$___X_CMD_GL_DEFAULT_OWNER" ]; then
             printf "No owner provided. Default owner not set.\n" >&2
         fi
-        owner_project="$(printf "%s" "$___X_CMD_GCODE_DEFAULT_OWNER/$op")"
+        owner_project="$(printf "%s" "$___X_CMD_GL_DEFAULT_OWNER/$op")"
         ;;
     esac
-    printf "%s" "$owner_project" | sed s:'/':'%2F':g
-}
-
-### Repo #1
-
-___x_cmd_gcode_parse_owner_repo(){
-    local O="${O:-___x_cmd_gcode_GCODE_DEFAULT}"
-    if [ -z "$repo" ]; then
-        repo="$(___x_cmd_gcode_current_repo)"
-    fi
-    # if [[ "$repo" = */* ]]; then
-    if str_regex "$repo" "/"; then
-        owner=${repo%%/*}
-        repo=${repo##*/}
-    fi
-    if [ -z "$owner" ]; then
-        owner="$(___x_cmd_gcode_current_owner)"
-    fi
-}
-
-___x_cmd_gcode_default(){
-    param_default "$@" 2>/dev/null || return 1
+    owner_project="$(printf "%s" "$owner_project" | sed s:'/':'%2F':g)"
 }
 
 _____x_cmd_git_repo(){
@@ -120,13 +168,12 @@ _____x_cmd_git_repo(){
 ___gcode_ui_mutual() {
     local tmp="$1"
     shift 1
-    if [ -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
-        if ! eval "$tmp -- \$@"  && [ -n "$___gh_error_msg" ]; then
-            ___x_cmd_ui_tf false "$___gh_error_msg"
-            return 1
-        fi
+    if [ -n "$json" ] || [ -n "$ENFORCE_JSON" ] ; then
+        ENFORCE_JSON=1 "$@"
     else
-        "$@"
+        # run ui table
+        eval "$tmp"
     fi
     return
 }
+# EndSection
