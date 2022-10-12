@@ -9,7 +9,7 @@ ___x_cmd_gcode_resp_header(){
 
 # TODO:HTTP CODE
 ______x_cmd_gcode_resp_header_code(){
-    ___x_cmd_gcode_resp_header  | awk '$1 ~/HTTP\/2$/ {print ($2+0);exit(0)}'
+    ___x_cmd_gcode_resp_header  | awk '$1 ~/HTTP\/1.1$/ {print ($2+0);exit(0)}'
 }
 
 ___x_cmd_gcode_curl(){
