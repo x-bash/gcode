@@ -8,10 +8,12 @@ ___x_cmd_gcode_project(){
         add             "Create project"                        \
         ls              "List project of owner"                 \
         info            "Show detailed information of project"  \
-        update          "Setup project configure"               \
+        edit            "Setup project configure"               \
         rm              "Remove project"                        \
         issue           "project issue list"                    \
         tag             "project tag"                           \
+        apply           "manage repo by declare configure"      \
+        branch          "project branch manage"                 \
         member          "project member manage"
     param:subcmd:try
     param:run
@@ -102,9 +104,7 @@ option:
     for name in "$@"; do
         gcode_log debug "___x_cmd_gcode_repo_add_data:$(x tmpl "$gen_gcode_json"  "${name##%/}")"
         x tmpl "$gen_gcode_json"  "${name##%/}" | \
-        ___x_cmd_gcode_curl post "/projects" "@-" | (
-            _____x_cmd_gcode_project_ui_utils Creating
-        )
+        ___x_cmd_gcode_curl post "/projects" "@-" | _____x_cmd_gcode_project_ui_utils Creating
     done
 }
 
@@ -141,8 +141,8 @@ options:
 }
 # EndSection
 
-# Section: update
-___x_cmd_gcode_project_update(){
+# Section: edit
+___x_cmd_gcode_project_edit(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
 options:
@@ -221,9 +221,7 @@ options:
     ___x_cmd_gcode_param_init_owner_project
     local gen_gcode_json
     gen_gcode_json="$(param:option2json)"
-    ___x_cmd_gcode_curl put "/projects/$owner_project" "gen_gcode_json" | (
-        _____x_cmd_gcode_project_ui_utils Update
-    )
+    ___x_cmd_gcode_curl put "/projects/$owner_project" "gen_gcode_json" | _____x_cmd_gcode_project_ui_utils Update
 }
 # EndSection
 
@@ -244,9 +242,7 @@ options:
     local project="$1"
     ___x_cmd_gcode_param_init_owner_project
 
-    ___x_cmd_gcode_curl get "/projects/$owner_project"| (
-        _____x_cmd_gcode_project_ui_utils Info
-   )
+    ___x_cmd_gcode_curl get "/projects/$owner_project"| _____x_cmd_gcode_project_ui_utils Info
 }
 # EndSection
 
@@ -278,7 +274,7 @@ options:
 # EndSection
 
 # Section: project utils
-_____x_cmd_gcode_project_ui_utils(){
+_____x_cmd_gcode_project_ui_utils()(
     if [ -n "$ENFORCE_JSON" ] || [ -n "$json" ]; then
         cat
         ___x_cmd_gcode_http_error
@@ -309,10 +305,10 @@ _____x_cmd_gcode_project_ui_utils(){
     if [ -n "$id" ]; then
         ___x_cmd_ui_tf true "$msg" "project_id: $id" ${project_owner+"project_owner: $project_owner"}  \
             ${name+"name: $name"} ${default_branch+"default_branch: $default_branch"} ${url+"url: $url"} \
-            ${visibility+"visibility":"$visibility"}
+            ${visibility+"visibility: $visibility"}
     else
         ___x_cmd_ui_tf false "$error_msg" "ErrorMsg:$error"
         return 1
     fi
-}
+)
 # EndSection

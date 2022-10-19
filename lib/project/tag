@@ -29,7 +29,7 @@ options:
 
     ___x_cmd_gcode_param_init_owner_project
     ___X_CMD_UI_STATIC=1 ___gcode_ui_mutual '___ui_table_json name=.name commit=.commit.short_id protected=.protected message=.message -- $@' \
-        ___x_cmd_gcode_get_multi "/projects/$owner_project/repository/tags"
+        ___x_cmd_gcode_get_multi "/projects/$owner_project/repository/tags" order_by sort
 }
 # EndSection
 
@@ -57,6 +57,9 @@ options:
     --project   "The ID or URL-encoded path of the project owned by the authenticated user" <>
     --ref       "Create tag using commit SHA, another tag name, or branch name"             <>
     --message   "Creates annotated tag"                                                     <>=""
+
+    --json|-j   "output json data"
+
 '
     param:run
 
@@ -67,13 +70,14 @@ options:
     ___x_cmd_gcode_curl post "/projects/$owner_project/repository/tags" gen_gcode_json | _____x_cmd_gcode_project_tag_ui_utils Create
 }
 
-# https://gitlab.com/api/swagger#/deleteV5projectsOwnerprojectCollaboratorsUsername
 ___x_cmd_gcode_project_tag_rm(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
 options:
     #1          "The name of a tag name"                                                    <>
     --project   "The ID or URL-encoded path of the project owned by the authenticated user" <>
+
+    --yes|-y    "Ignore remove prompt interception"
 '
     param:run
 
