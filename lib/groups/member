@@ -48,7 +48,7 @@ options:
 '
     param:run
 
-    ___x_cmd_gcode_curl get "/groups/$1/members/$user_id" | (_____x_cmd_groups_member_ui_utils User)
+    ___x_cmd_gcode_curl get "/groups/$1/members/$user_id" | _____x_cmd_groups_member_ui_utils User
 }
 
 # shellcheck disable=SC2181
@@ -58,7 +58,7 @@ ___x_cmd_gcode_groups_member_add(){
 options:
     --id                    "The ID or URL-encoded path of the group"                                   <>:address
     --expires_at            "A date string in the format YEAR-MONTH-DAY"                                <>=""
-    --access_level          "A valid access level"                                                      <>:Number
+    --access_level          "A valid access level"                                                      <>:Number = 10 20 30 40 50 guest reporter developer maintainer owner
     --invite_source         "The source of the invitation that starts the member creation process."     <>=""
     --tasks_to_be_done      "Tasks the inviter wants the member to focus on."                           <>=""
     --tasks_project_id      "The project ID in which to create the task issues."                        <>=""
@@ -69,12 +69,15 @@ options:
     param:run
 
     local user_id="${___X_CMD_TX}"
+
+    _____x_cmd_gcode_member_util
+
     local gen_gcode_json
     gen_gcode_json="$(param:option2json -id +user_id)"
 
     for name in "$@"; do
         {
-            x tmpl "$gen_gcode_json" "$name" | ___x_cmd_gcode_curl post  "/groups/$id/members" "@-" | (_____x_cmd_groups_member_ui_utils Add)
+            x tmpl "$gen_gcode_json" "$name" | ___x_cmd_gcode_curl post  "/groups/$id/members" "@-" | _____x_cmd_groups_member_ui_utils Add
         }
     done
 }
@@ -85,17 +88,19 @@ ___x_cmd_gcode_groups_member_update(){
 options:
     --id                    "The ID or URL-encoded path of the group"                                   <>:address
     --expires_at            "A date string in the format YEAR-MONTH-DAY"                                <>=""
-    --access_level          "A valid access level"                                                      <>:Number
+    --access_level      "A valid access level"                                                          <>:Number = 10 20 30 40 50 guest reporter developer maintainer owner
     --user_id               "The user ID of the new member or multiple IDs separated by commas"         <>
 
     --json|-j               "output json data"
 '
     param:run
 
+    _____x_cmd_gcode_member_util
+
     local gen_gcode_json
     gen_gcode_json="$(param:option2json -id -user_id)"
 
-    ___x_cmd_gcode_curl put "/groups/$id/members/$user_id" "gen_gcode_json" | (_____x_cmd_groups_member_ui_utils Update)
+    ___x_cmd_gcode_curl put "/groups/$id/members/$user_id" "gen_gcode_json" | _____x_cmd_groups_member_ui_utils Update
 }
 
 
@@ -136,7 +141,7 @@ options:
     done
 }
 
-_____x_cmd_groups_member_ui_utils(){
+_____x_cmd_groups_member_ui_utils()(
     if  [ -n "$ENFORCE_JSON" ] || [ -n "$json" ]; then
         cat
         ___x_cmd_gcode_http_error
@@ -165,4 +170,4 @@ _____x_cmd_groups_member_ui_utils(){
         ___x_cmd_ui_tf false "$error_msg" "ErrorMsg:$error"
         return 1
     fi
-}
+)

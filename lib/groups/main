@@ -108,7 +108,7 @@ options:
 '
     param:run
 
-    ___x_cmd_gcode_curl get "/groups/$1" | (_____x_cmd_groups_ui_utils Info)
+    ___x_cmd_gcode_curl get "/groups/$1" |_____x_cmd_groups_ui_utils Info
 }
 # EndSection
 
@@ -134,7 +134,7 @@ options:
     local gen_gcode_json
     gen_gcode_json="$(param:option2json -p +name path=gcode_path)"
 
-    ___x_cmd_gcode_curl post "/groups" "$gen_gcode_json" || (_____x_cmd_groups_ui_utils Creating)
+    ___x_cmd_gcode_curl post "/groups" "$gen_gcode_json" || _____x_cmd_groups_ui_utils Creating
 }
 # EndSection
 
@@ -155,7 +155,7 @@ options:
     local group_path="$subgroup_path"
     [ -n "$group_path" ] || group_path="$name"
     gen_gcode_json="$(param:option2json -subgroup_path path=group_path)"
-    ___x_cmd_gcode_curl post "/groups" "gen_gcode_json"| (_____x_cmd_groups_ui_utils Creating)
+    ___x_cmd_gcode_curl post "/groups" "gen_gcode_json"| _____x_cmd_groups_ui_utils Creating
 }
 # EndSection
 
@@ -181,7 +181,7 @@ options:
     local gen_gcode_json
     gen_gcode_json="$(param:option2json -p path=gcode_path)"
 
-    ___x_cmd_gcode_curl put "/groups/$1" "gen_gcode_json" | (_____x_cmd_groups_ui_utils Update)
+    ___x_cmd_gcode_curl put "/groups/$1" "gen_gcode_json" | _____x_cmd_groups_ui_utils Update
 }
 # EndSection
 
@@ -298,7 +298,7 @@ options:
         ___x_cmd_gcode_get_multi "/groups/$id/issues" sort order_by search state author_username
 }
 
-_____x_cmd_groups_ui_utils(){
+_____x_cmd_groups_ui_utils()(
     if  [ -n "$ENFORCE_JSON" ] || [ -n "$json" ]; then
         cat
         ___x_cmd_gcode_http_error
@@ -332,4 +332,4 @@ _____x_cmd_groups_ui_utils(){
         ___x_cmd_ui_tf false "$error_msg" "ErrorMsg:$error"
         return 1
     fi
-}
+)
