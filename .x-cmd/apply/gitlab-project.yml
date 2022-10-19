@@ -1,0 +1,14 @@
+<src>: x-bash/member
+
+project: mycw/test
+visibility: private
+default_branch: test
+
+member:
+    owner:
+        - mycw
+    maintainer:
+    developer:
+        - tzw
+    reporter:
+    guest:

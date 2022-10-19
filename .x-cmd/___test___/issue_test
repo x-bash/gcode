@@ -1,0 +1,170 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043,2016
+
+test_gcode_issue_ls(){
+    local title="glitle"
+    @assert stdout eval 'x gcode issue ls --json --order_by "created_at" --state "opened" --search "$title" --milestone_id "$milestone_id" | x jo . .1.title .1.state'<<A
+"$title"
+"opened"
+A
+
+    NO_COLOR=1 @assert stdout x gcode issue ls --assignee_id "$assignee_id" --order_by "created_at" --state "closed" --sort "asc" <<A
+Id          iid   project_id   title   state    web_url
+111762945   2     37781042     test1   closed   https://gitlab.com/huangst798/projects/-/issues/2
+
+
+A
+
+    @assert stdout x gcode issue ls --json --order_by "created_at" --state "opened" --search "err$title" --milestone_id "$milestone_id" <<A
+[]
+A
+
+    NO_COLOR=1 @assert stdout x gcode issue ls --order_by "created_at" --state "opened" --search "err$title" --milestone_id "$milestone_id" <<A
+Id   iid   project_id   title   state   web_url
+
+
+A
+}
+
+test_gcode_issue_create(){
+    local project_path="projects"
+    local title="xcmd9"
+    local labels="bug"
+    local description="xcmd9"
+    local milestone_id="2828960"
+    local assignee_id="12051734"
+    @assert stdout eval "x gcode issue create --json --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "$milestone_id" --assignee_id "$assignee_id" | x jo . .title .description .labels.1 .milestone.id .assignee.id"<<A
+"$title"
+"$description"
+"$labels"
+$milestone_id
+$assignee_id
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode issue create --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "$milestone_id" --assignee_id "$assignee_id" | awk '\''
+NR==2{
+    print match($0, " - id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - iid: " "[0-9]+" )
+}
+NR==4{
+    print match($0, " - title:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - state:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==6{
+    print match($0, " - author:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==7{
+    print match($0, " - url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode issue create --json --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "err$milestone_id" --assignee_id "$assignee_id" |x jo .error'<<A
+"milestone_id is invalid"
+A
+
+    NO_COLOR=1 @assert stdout x gcode issue create --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "err$milestone_id" --assignee_id "$assignee_id" <<A
+X Failed to Creating issue.
+ - ErrorMsg:{"error":"milestone_id is invalid"}
+A
+}
+
+test_gcode_issue_update(){
+    local project_path="projects"
+    local iid ; iid="$(x gcode issue ls --json | x jo .1.iid)"
+    local iids ; iids="$(x gcode issue ls --json | x jo .2.iid)"
+    local title="xcmd11"
+    local labels="bug"
+    local description="test1"
+    local milestone_id="2828960"
+    @assert stdout eval "x gcode issue update --json --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "$milestone_id" --state_event "close" "$iid" | x jo . .iid .title .description .labels.1 .milestone.id .state"<<A
+$iid
+"$title"
+"$description"
+"$labels"
+$milestone_id
+"closed"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode issue update --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "$milestone_id" --state_event "close" "$iids" | awk '\''
+NR==2{
+    print match($0, " - id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - iid: " "[0-9]+" )
+}
+NR==4{
+    print match($0, " - title:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - state:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==6{
+    print match($0, " - author:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==7{
+    print match($0, " - url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode issue update --json --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "err$milestone_id" "$iid" |x jo .error'<<A
+"milestone_id is invalid"
+A
+
+    NO_COLOR=1 @assert stdout x gcode issue update --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
+    --milestone_id "err$milestone_id" "$iids" <<A
+X Failed to Update issue.
+ - ErrorMsg:{"error":"milestone_id is invalid"}
+A
+}
+
+test_gcode_issue_rm(){
+    local project_path="projects"
+    local iid ; iid="$(x gcode issue ls --json | x jo .1.iid)"
+    local iids ; iids="$(x gcode issue ls --json | x jo .2.iid)"
+    x gcode issue rm -y --project "$project_path" "$iid"
+    @assert stdout echo $? <<A
+0
+A
+
+    NO_COLOR=1 @assert stdout x gcode issue rm -y --project "$project_path" "$iids" <<A
+✔ Successfully deleted iid $iids issue in $project_path project
+A
+
+    x gcode issue rm -y --project "$project_path" "$iid"
+    @assert stdout echo $? <<A
+1
+A
+
+    NO_COLOR=1 @assert stdout x gcode issue rm -y --project "$project_path" "$iid" <<A
+X Failed to delete iid $iid issue in $project_path project.
+ - ErrorMsg:{"message":"404 Issue Not Found"}
+A
+}
+
+
+@assert:file:func

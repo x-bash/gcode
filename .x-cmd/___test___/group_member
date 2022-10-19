@@ -1,0 +1,178 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043,2016
+
+
+
+test_gcode_groups_member_ls(){
+    local id="58891286"
+    local username
+    username="$(x gcode current owner)"
+    @assert stdout eval 'x gcode groups member ls --query "$username" --json "$id" | x jo . .1.username'<<A
+"$username"
+A
+#TODO:
+#     NO_COLOR=1 @assert stdout x gcode groups member ls --query "$username" "$id" <<A
+# Id         Username     Web_url                         State
+# 12051734   huangst798   https://gitlab.com/huangst798   active
+
+
+# A
+
+    @assert stdout x gcode groups member ls --query "err$username" --json "$id" <<A
+[]
+A
+
+#     NO_COLOR=1 @assert stdout x gcode groups member ls --query "err$username" "$id" <<A
+# Id   Username   web_url   State
+
+
+# A
+}
+
+
+test_gcode_groups_member_user(){
+    local id="58891286"
+    local user_id="12051734"
+    @assert stdout eval 'x gcode groups member user --user_id "$user_id" --json "$id" | x jo . .id'<<A
+$user_id
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode groups member user --user_id "$user_id" "$id" | awk '\''
+NR==2{
+    print match($0, " - Id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - Username:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+'\'' ' << A
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode groups member user --json --user_id "11$user_id" "$id" |x jo .message'<<A
+"404 Not found"
+A
+
+    NO_COLOR=1 @assert stdout x gcode groups member user --user_id "11$user_id" "$id"  <<A
+X Couldn't find any data by 11$user_id in groups $id
+ - ErrorMsg:{"message":"404 Not found"}
+A
+}
+
+test_gcode_groups_member_add(){
+    local id="58891286"
+    local user_id="120517"
+    local User_id="1205173"
+    local user_Id="12323"
+    local expires_at="2022-10-10"
+    local access_level=30
+    @assert stdout eval "x gcode groups member add --json --id "$id" --expires_at "$expires_at" --access_level "$access_level" \
+    "$user_id" | x jo . .id .access_level .expires_at"<<A
+$user_id
+30
+"$expires_at"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode groups member add --id "$id" --expires_at "$expires_at" --access_level "$access_level" "$User_id"| awk '\''
+NR==2{
+    print match($0, " - Id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - Username:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+NR==5{
+    print match($0, " - Access_level: " "[0-9]+" )
+}
+'\'' ' << A
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode groups member add --json --id "$id" --expires_at "$expires_at" --access_level "1$access_level" "$user_Id" |x jo .message'<<A
+{"access_level":["is not included in the list"]}
+A
+
+    NO_COLOR=1 @assert stdout x gcode groups member add --id "$id" --expires_at "$expires_at" --access_level "1$access_level" "$user_Id" <<A
+X Add user failure.
+ - ErrorMsg:{"message":{"access_level":["is not included in the list"]}}
+A
+}
+
+test_gcode_groups_member_update(){
+    local id="58891286"
+    local user_id="120517"
+    local User_id="1205173"
+    local expires_at="2022-10-10"
+    local access_level=40
+    @assert stdout eval "x gcode groups member update --json --id "$id" --expires_at "$expires_at" --access_level "$access_level" --user_id "$user_id" | x jo . .id .access_level .expires_at"<<A
+$user_id
+$access_level
+"$expires_at"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode groups member update --id "$id" --expires_at "$expires_at" --access_level "$access_level" --user_id "$User_id"| awk '\''
+NR==2{
+    print match($0, " - Id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - Username:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+NR==5{
+    print match($0, " - Access_level: " "[0-9]+" )
+}
+'\'' ' << A
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode groups member update --json --id "$id" --expires_at "$expires_at" --access_level "1$access_level" --user_id "$user_id" |x jo .message'<<A
+{"access_level":["is not included in the list"]}
+A
+
+    NO_COLOR=1 @assert stdout x gcode groups member update --id "$id" --expires_at "$expires_at" --access_level "1$access_level" --user_id "$user_id" <<A
+X Update user failure.
+ - ErrorMsg:{"message":{"access_level":["is not included in the list"]}}
+A
+}
+
+
+
+test_gh_groups_member_rm(){
+    local id="58891286"
+    local user_id="120517"
+    local User_id="1205173"
+    x gcode groups member rm -y --id "$id" "$user_id"
+    @assert stdout echo $? <<A
+0
+A
+
+    NO_COLOR=1 @assert stdout x gcode groups member rm -y --id "$id" "$User_id" <<A
+✔ del member $User_id successfully.
+A
+
+    x gcode groups member rm -y --id "$id" --user_id "$user_id"
+    @assert stdout echo $? <<A
+1
+A
+
+    NO_COLOR=1 @assert stdout x gcode groups member rm -y --id "$id" --user_id "$user_id" <<A
+X del member $user_id failure.
+A
+}
+
+
+# @assert:file:func

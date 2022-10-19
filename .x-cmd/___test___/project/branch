@@ -1,0 +1,184 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043,2016
+
+test_gcode_project_branch_main(){
+    username="$(x gcode current owner)"
+}
+
+
+test_gcode_project_bracnh_ls(){
+    local project_path="projects"
+    @assert stdout eval 'x gcode project branch ls --json --project "$project_path" --per_page "1" --page "1" | x jo . .1.commit.author_name'<<A
+"$username"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project branch ls --project "$project_path" --per_page "1" --page "1" <<A
+BranchName   Protected   Default   LastCommit
+main         true        true      d5928b19
+
+
+A
+
+    @assert stdout x gcode project branch ls --json --project "$project_path" --per_page "100" --page "1" <<A
+[]
+A
+
+    NO_COLOR=1 @assert stdout x gcode project branch ls --project "$project_path" --per_page "100" --page "1" <<A
+BranchName   Protected   Default   LastCommit
+
+
+A
+}
+
+
+test_gcode_project_tag_info(){
+    local project_path="projects"
+    local branch="main"
+    @assert stdout eval 'x gcode project branch info --json --project "$project_path" "$branch" | x jo . .name .commit.author_name'<<A
+"$branch"
+"$username"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode project branch info --project "$project_path" "$branch" | awk '\''
+NR==2{
+    print match($0, " - Name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==3{
+    print match($0, " - Protected:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Merged:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - LastCommit:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==6{
+    print match($0, " - Url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode project branch info --json --project "$project_path" "err$branch" | x jo .message'<<A
+"404 Branch Not Found"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project branch info --project "$project_path" "err$branch"  <<A
+X get repo projects branch info fail
+ - ErrorMsg:{"message":"404 Branch Not Found"}
+A
+}
+#TODO:
+# test_gcode_project_tag_default(){
+#     local project_path="projects"
+#     local branch="main"
+#     @assert stdout eval 'x gcode project branch default --json --project "$project_path" "$branch" | x jo . .name .commit.author_name'<<A
+# "$branch"
+# "$username"
+# A
+
+#     NO_COLOR=1 @assert stdout eval 'x gcode project branch default --project "$project_path" "$branch" | awk '\''
+# NR==2{
+#     print match($0, " - Name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+# }
+# NR==3{
+#     print match($0, " - Protected:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+# }
+# NR==4{
+#     print match($0, " - Merged:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+# }
+# NR==5{
+#     print match($0, " - LastCommit:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+# }
+# NR==6{
+#     print match($0, " - Url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+# }
+# '\'' ' << A
+# 1
+# 1
+# 1
+# 1
+# 1
+# A
+
+#     @assert stdout eval 'x gcode project branch default --json --project "$project_path" "err$branch" | x jo .message'<<A
+# "404 Branch Not Found"
+# A
+
+#     NO_COLOR=1 @assert stdout x gcode project branch default --project "$project_path" "err$branch"  <<A
+# X get repo projects branch info fail
+#  - ErrorMsg:{"message":"404 Branch Not Found"}
+# A
+# }
+
+test_gcode_project_bracnh_protection_ls(){
+    local project_path="projects"
+    @assert stdout eval 'x gcode project branch protection ls --json --project "$project_path" --per_page "1" --page "1" | x jo . .name'<<A
+"main"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project branch protection ls --project "$project_path" --per_page "1" --page "1" <<A
+BranchName   allow_force_push   code_owner_approval_required
+main         false              false
+
+
+A
+
+    @assert stdout x gcode project branch protection ls --json --project "$project_path" --per_page "1" --page "10" <<A
+[]
+A
+
+    NO_COLOR=1 @assert stdout x gcode project protection branch ls --project "$project_path" --per_page "1" --page "10" <<A
+BranchName   allow_force_push   code_owner_approval_required
+
+
+A
+}
+
+test_gcode_project_bracnh_protection_info(){
+    local project_path="projects"
+    local branch="main"
+    @assert stdout eval 'x gcode project branch info --json --project "$project_path" "$branch" | x jo . .name .commit.author_name'<<A
+"$branch"
+"$username"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode project branch info --project "$project_path" "$branch" | awk '\''
+NR==2{
+    print match($0, " - Name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==3{
+    print match($0, " - Protected:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Merged:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - LastCommit:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==6{
+    print match($0, " - Url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode project branch info --json --project "$project_path" "err$branch" | x jo .message'<<A
+"404 Branch Not Found"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project branch info --project "$project_path" "err$branch"  <<A
+X get repo projects branch info fail
+ - ErrorMsg:{"message":"404 Branch Not Found"}
+A
+}
+
+# @assert:file:func

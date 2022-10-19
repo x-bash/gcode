@@ -1,0 +1,225 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043,2016
+
+test_gcode_project_main(){
+    username="$(x gcode current owner)"
+}
+
+
+# test_gcode_project_ls(){
+#     @assert stdout eval 'x gcode project ls --json --page 1 --per_page 1 | x jo . .1.namespace.name'<<A
+# "$username"
+# A
+
+# #     NO_COLOR=1 @assert stdout x gcode project ls --page 1 --per_page 1 <<A
+# # Id         Name          Owner        Url
+# # 37813605   new_project   huangst798   https://gitlab.com/huangst798/new_project
+
+
+# # A
+
+#     @assert stdout x gcode project ls --json --page 40 --per_page 1 <<A
+# []
+# A
+
+#     NO_COLOR=1 @assert stdout x gcode project ls --page 40 --per_page 1 <<A
+# Id   Name   Owner   Url
+
+
+# A
+# }
+
+test_gcode_project_issue(){
+    local project_path="projects"
+    local project_id="$(x gcode project info --json projects | x jo .id)"
+    @assert stdout eval 'x gcode project issue --project "$project_path" --json --state "closed" | x jo . .1.project_id .1.state'<<A
+$project_id
+"closed"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project issue --project "$project_path" --order_by "created_at" --state "opened" --sort "asc"<<A
+Id          iid   project_id   title    state    web_url
+111762003   1     37781042     test1    opened   https://gitlab.com/huangst798/projects/-/issues/1
+111774197   3     37781042     test1    opened   https://gitlab.com/huangst798/projects/-/issues/3
+111782250   5     37781042     test03   opened   https://gitlab.com/huangst798/projects/-/issues/5
+
+
+A
+
+    @assert stdout eval 'x gcode project issue --project "$project_path" --json --order_by "create_at" --state "closed" | x jo .error' <<A
+"order_by does not have a valid value"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project issue --project "$project_path" --order_by "create_at" --state "close" <<A
+Id   iid   project_id   title   state   web_url
+
+
+A
+}
+
+# test_gcode_project_info(){
+#     local project_path="new_project"
+#     @assert stdout eval 'x gcode project info --json "$project_path" | x jo . .path'<<A
+# "$project_path"
+# A
+
+#     NO_COLOR=1 @assert stdout eval 'x gcode project info "$project_path" | awk '\''
+# NR==2{
+#     print match($0, " - project_id: " "[0-9]+" )
+# }
+# NR==3{
+#     print match($0, " - name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+# }
+# NR==4{
+#     print match($0, " - default_branch:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+# }
+# NR==5{
+#     print match($0, " - url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+# }
+# '\'' ' << A
+# 1
+# 1
+# 1
+# 1
+# A
+
+#     @assert stdout eval 'x gcode project info --json "err$project_path" |x jo .message'<<A
+# "404 Project Not Found"
+# A
+
+#     NO_COLOR=1 @assert stdout x gcode project info "err$project_path"  <<A
+# X Failed to get project information.
+#  - ErrorMsg:{"message":"404 Project Not Found"}
+# A
+# }
+
+test_gcode_project_add(){
+    local path="project_name"
+    local visibility="private"
+    local description="gltest"
+    local project_name="gltest"
+    @assert stdout eval "x gcode project add --json --path "$path" --visibility "$visibility" --description "$description" \
+    "$project_name" | x jo . .name .path .visibility .description"<<A
+"$project_name"
+"$path"
+"$visibility"
+"$description"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode project add --path "ui$path" --visibility "$visibility" --description "$description" \
+    "ui$project_name" | awk '\''
+NR==2{
+    print match($0, " - project_id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - project_owner:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+NR==6{
+    print match($0, " - visibility:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode project add --json --path "err$path" --visibility "$visibility" --description "$description" \
+    --merge_method "err_merge_method" "err$project_name" |x jo .error'<<A
+"merge_method does not have a valid value"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project add --path "err$path" --visibility "$visibility" --description "$description" \
+    --merge_method "err_merge_method" "err$project_name" <<A
+X Creating project failure: err$project_name.
+ - ErrorMsg:{"error":"merge_method does not have a valid value"}
+A
+}
+
+test_gcode_project_edit(){
+    local project_name="gltest"
+    local path="project_name"
+    local visibility="public"
+    local description="gltest"
+    @assert stdout eval "x gcode project edit --json --name "update$project_name" --visibility "$visibility" --description "update$description" \
+    "$path"| x jo . .name .path .visibility .description"<<A
+"update$project_name"
+"$path"
+"$visibility"
+"update$description"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode project edit --name "update$project_name" --visibility "$visibility" --description "update$description" \
+    "$path" | awk '\''
+NR==2{
+    print match($0, " - project_id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - project_owner:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - default_branch:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==6{
+    print match($0, " - url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+NR==7{
+    print match($0, " - visibility:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode project edit --json --name "update$project_name" --visibility "$visibility" --description "update$description" \
+    --default_branch "errbranch" "$path" |x jo .message'<<A
+{"base":["Could not change HEAD: branch 'errbranch' does not exist"]}
+A
+
+    NO_COLOR=1 @assert stdout x gcode project edit --name "update$project_name" --visibility "$visibility" --description "update$description" \
+    --default_branch "errbranch" "$path" <<A
+X Update failure: $path.
+ - ErrorMsg:{"message":{"base":["Could not change HEAD: branch 'errbranch' does not exist"]}}
+A
+}
+
+
+
+test_gh_project_rm(){
+    local path="project_name"
+    x gcode project rm -y "$path"
+    @assert stdout echo $? <<A
+0
+A
+
+    NO_COLOR=1 @assert stdout x gcode project rm -y "ui$path" <<A
+✔ Deleting repo ui$path successfully.
+A
+
+    x gcode project rm -y "err$path"
+    @assert stdout echo $? <<A
+1
+A
+
+    NO_COLOR=1 @assert stdout x gcode project rm -y "err$project_name" <<A
+X Deleting repo failure: err$project_name. Probably because it desn't exists.
+ - ErrorMsg:{"message":"404 Project Not Found"}
+A
+}
+
+
+# @assert:file:func

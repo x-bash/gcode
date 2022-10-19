@@ -1,0 +1,140 @@
+# shellcheck shell=sh
+# shellcheck disable=SC2039,3043,2016
+
+test_gcode_project_tag_main(){
+    username="$(x gcode current owner)"
+}
+
+
+test_gcode_project_tag_ls(){
+    local project_path="projects"
+    @assert stdout eval 'x gcode project tag ls --json --project "$project_path" --order_by "updated" --sort "asc" | x jo . .1.commit.author_name'<<A
+"$username"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project tag ls --project "$project_path" --order_by "updated" --sort "asc" <<A
+name     commit     protected   message
+master   d5928b19   false
+
+
+A
+
+    @assert stdout eval 'x gcode project tag ls --json --project "$project_path" --order_by "update" --sort "asc"| x jo .error'<<A
+"order_by does not have a valid value"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project tag ls --project "$project_path" --order_by "update" --sort "asc" <<A
+name   commit   protected   message
+
+
+A
+}
+
+
+test_gcode_project_tag_info(){
+    local project_path="projects"
+    local tag="master"
+    @assert stdout eval 'x gcode project tag info --json --project "$project_path" "$tag" | x jo . .name .commit.author_name'<<A
+"$tag"
+"$username"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode project tag info --project "$project_path" "$tag" | awk '\''
+NR==2{
+    print match($0, " - Name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==3{
+    print match($0, " - Commit:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Release:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - Protected:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+'\'' ' << A
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode project tag info --json --project "$project_path" "err$tag" |x jo .message'<<A
+"404 Tag Not Found"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project tag info --project "$project_path" "err$tag"  <<A
+X Failed to get project tag information
+ - ErrorMsg:{"message":"404 Tag Not Found"}
+A
+}
+
+test_gcode_project_tag_create(){
+    local project_path="projects"
+    local ref="main"
+    local message="gltest"
+    local tag="gltest"
+    @assert stdout eval "x gcode project tag create --json --project "$project_path" --ref "$ref" --message "$message" "$tag" | x jo . .name .commit.author_name .message"<<A
+"$tag"
+"$username"
+"$message"
+A
+
+    NO_COLOR=1 @assert stdout eval 'x gcode project tag create --project "$project_path" --ref "$ref" --message "$message" "ui$tag" | awk '\''
+NR==2{
+    print match($0, " - Name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==3{
+    print match($0, " - Commit:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Release:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - Protected:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==6{
+    print match($0, " - Message:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+A
+
+    @assert stdout eval 'x gcode project tag create --json --project "$project_path" --ref "err$ref" --message "$message" "$tag" |x jo .message'<<A
+"Target err$ref is invalid"
+A
+
+    NO_COLOR=1 @assert stdout x gcode project tag create --project "$project_path" --ref "err$ref" --message "$message" "$tag" <<A
+X Failed to get project tag information
+ - ErrorMsg:{"message":"Target err$ref is invalid"}
+A
+}
+
+test_gh_project_tag_rm(){
+    local project_path="projects"
+    local tag="gltest"
+    x gcode project tag rm -y --project "$project_path" "$tag"
+    @assert stdout echo $? <<A
+0
+A
+
+    NO_COLOR=1 @assert stdout x gcode project tag rm -y --project "$project_path" "ui$tag" <<A
+✔ Remove ui$tag successfully.
+A
+
+    x gcode project tag rm -y --project "$project_path" "err$tag"
+    @assert stdout echo $? <<A
+1
+A
+
+    NO_COLOR=1 @assert stdout x gcode project tag rm -y --project "$project_path" "err$tag" <<A
+X Remove err$tag failure
+A
+}
+
+
+# @assert:file:func
