@@ -129,7 +129,7 @@ _____x_cmd_gcode_next_url(){
 }
 # EndSection
 
-# Section 3: Parameter Utilities
+# Section: Parameter Utilities
 alias ___x_cmd_gcode_param_init_owner_project='
     local owner_project
     ___x_cmd_gcode_param_normalize_repo  || return
@@ -175,5 +175,22 @@ ___gcode_ui_mutual() {
         eval "$tmp"
     fi
     return
+}
+# EndSection
+
+# Section: gcode member access
+_____x_cmd_gcode_member_util(){
+    case $access_level in
+        owner)
+            access_level=50;;
+        maintainer)
+            access_level=40;;
+        developer)
+            access_level=30;;
+        reporter)
+            access_level=20;;
+        guest)
+            access_level=10;;
+    esac
 }
 # EndSection
