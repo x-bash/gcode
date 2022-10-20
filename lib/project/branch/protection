@@ -28,7 +28,7 @@ options:
 
     ___x_cmd_gcode_param_init_owner_project
     ___X_CMD_UI_STATIC=1 ___gcode_ui_mutual '___ui_table_json BranchName=.name allow_force_push=.allow_force_push code_owner_approval_required=.code_owner_approval_required -- $@' \
-        ___x_cmd_gcode_get_multi "/projects/$owner_project/protected_branches"
+        ___x_cmd_gcode_get_multi "/projects/$owner_project/protected_branches" search
 }
 # EndSection
 

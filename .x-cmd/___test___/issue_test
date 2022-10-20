@@ -2,15 +2,20 @@
 # shellcheck disable=SC2039,3043,2016
 
 test_gcode_issue_ls(){
-    local title="glitle"
-    @assert stdout eval 'x gcode issue ls --json --order_by "created_at" --state "opened" --search "$title" --milestone_id "$milestone_id" | x jo . .1.title .1.state'<<A
+    local title="testcase"
+    local milestone_id="2696"
+    @assert stdout eval 'x gcode issue ls --json --order_by "created_at" --state "closed" --search "$title" --milestone_id \
+    "$milestone_id" | x jo . .1.title .1.state .1.milestone.id'<<A
 "$title"
-"opened"
+"closed"
+$milestone_id
 A
 
-    NO_COLOR=1 @assert stdout x gcode issue ls --assignee_id "$assignee_id" --order_by "created_at" --state "closed" --sort "asc" <<A
-Id          iid   project_id   title   state    web_url
-111762945   2     37781042     test1   closed   https://gitlab.com/huangst798/projects/-/issues/2
+    NO_COLOR=1 @assert stdout x gcode issue ls --order_by "created_at" --state "opened" --sort "asc" <<A
+Id      iid   project_id   title     state    web_url                                         
+89952   3     198062       dgotcas   opened   https://gitcode.net/curryhst/gcode/-/issues/3   
+89951   2     198062       gidasd    opened   https://gitcode.net/curryhst/gcode/-/issues/2   
+89884   1     198062       test111   opened   https://gitcode.net/curryhst/gcode/-/issues/1   
 
 
 A
@@ -20,19 +25,19 @@ A
 A
 
     NO_COLOR=1 @assert stdout x gcode issue ls --order_by "created_at" --state "opened" --search "err$title" --milestone_id "$milestone_id" <<A
-Id   iid   project_id   title   state   web_url
+Id   iid   project_id   title   state   web_url   
 
 
 A
 }
 
 test_gcode_issue_create(){
-    local project_path="projects"
+    local project_path="gcode"
     local title="xcmd9"
     local labels="bug"
     local description="xcmd9"
-    local milestone_id="2828960"
-    local assignee_id="12051734"
+    local milestone_id="2696"
+    local assignee_id="1145121"
     @assert stdout eval "x gcode issue create --json --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
     --milestone_id "$milestone_id" --assignee_id "$assignee_id" | x jo . .title .description .labels.1 .milestone.id .assignee.id"<<A
 "$title"
@@ -84,13 +89,13 @@ A
 }
 
 test_gcode_issue_update(){
-    local project_path="projects"
+    local project_path="gcode"
     local iid ; iid="$(x gcode issue ls --json | x jo .1.iid)"
     local iids ; iids="$(x gcode issue ls --json | x jo .2.iid)"
     local title="xcmd11"
     local labels="bug"
     local description="test1"
-    local milestone_id="2828960"
+    local milestone_id="2696"
     @assert stdout eval "x gcode issue update --json --project "$project_path" --title "$title" --labels "$labels" --description "$description" \
     --milestone_id "$milestone_id" --state_event "close" "$iid" | x jo . .iid .title .description .labels.1 .milestone.id .state"<<A
 $iid
@@ -143,7 +148,7 @@ A
 }
 
 test_gcode_issue_rm(){
-    local project_path="projects"
+    local project_path="gcode"
     local iid ; iid="$(x gcode issue ls --json | x jo .1.iid)"
     local iids ; iids="$(x gcode issue ls --json | x jo .2.iid)"
     x gcode issue rm -y --project "$project_path" "$iid"
@@ -167,4 +172,4 @@ A
 }
 
 
-@assert:file:func
+# @assert:file:func

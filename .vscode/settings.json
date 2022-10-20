@@ -8,7 +8,7 @@
         "**/LICENSE": "TXT",
         "**/*": "shellscript",
     },
-    "files.trimTrailingWhitespace": true,
+    "files.trimTrailingWhitespace": false,
     "editor.detectIndentation": true,
     "editor.tabSize": 4,
     "explicitFolding.rules": {

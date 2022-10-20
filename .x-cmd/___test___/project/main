@@ -6,42 +6,44 @@ test_gcode_project_main(){
 }
 
 
-# test_gcode_project_ls(){
-#     @assert stdout eval 'x gcode project ls --json --page 1 --per_page 1 | x jo . .1.namespace.name'<<A
-# "$username"
-# A
+test_gcode_project_ls(){
+    @assert stdout eval 'x gcode project ls --json --page 1 --per_page 3 | x jo . .3.namespace.path'<<A
+"$username"
+A
 
-# #     NO_COLOR=1 @assert stdout x gcode project ls --page 1 --per_page 1 <<A
-# # Id         Name          Owner        Url
-# # 37813605   new_project   huangst798   https://gitlab.com/huangst798/new_project
-
-
-# # A
-
-#     @assert stdout x gcode project ls --json --page 40 --per_page 1 <<A
-# []
-# A
-
-#     NO_COLOR=1 @assert stdout x gcode project ls --page 40 --per_page 1 <<A
-# Id   Name   Owner   Url
+    NO_COLOR=1 @assert stdout x gcode project ls --page 1 --per_page 10 <<A
+Id       Name     Owner      Url                                  
+198181   gcode               https://gitcode.net/xxys/gcode       
+198180   gltest              https://gitcode.net/xxys/gltest      
+198062   gcode    curryhst   https://gitcode.net/curryhst/gcode   
 
 
-# A
-# }
+A
+
+    @assert stdout x gcode project ls --json --page 40 --per_page 10 <<A
+[]
+A
+
+    NO_COLOR=1 @assert stdout x gcode project ls --page 40 --per_page 10 <<A
+Id   Name   Owner   Url   
+
+
+A
+}
 
 test_gcode_project_issue(){
-    local project_path="projects"
-    local project_id="$(x gcode project info --json projects | x jo .id)"
+    local project_path="gcode"
+    local project_id="$(x gcode project info --json gcode | x jo .id)"
     @assert stdout eval 'x gcode project issue --project "$project_path" --json --state "closed" | x jo . .1.project_id .1.state'<<A
 $project_id
 "closed"
 A
 
     NO_COLOR=1 @assert stdout x gcode project issue --project "$project_path" --order_by "created_at" --state "opened" --sort "asc"<<A
-Id          iid   project_id   title    state    web_url
-111762003   1     37781042     test1    opened   https://gitlab.com/huangst798/projects/-/issues/1
-111774197   3     37781042     test1    opened   https://gitlab.com/huangst798/projects/-/issues/3
-111782250   5     37781042     test03   opened   https://gitlab.com/huangst798/projects/-/issues/5
+Id      iid   project_id   title     state    web_url                                         
+89952   3     198062       dgotcas   opened   https://gitcode.net/curryhst/gcode/-/issues/3   
+89951   2     198062       gidasd    opened   https://gitcode.net/curryhst/gcode/-/issues/2   
+89884   1     198062       test111   opened   https://gitcode.net/curryhst/gcode/-/issues/1   
 
 
 A
@@ -51,53 +53,53 @@ A
 A
 
     NO_COLOR=1 @assert stdout x gcode project issue --project "$project_path" --order_by "create_at" --state "close" <<A
-Id   iid   project_id   title   state   web_url
+Id   iid   project_id   title   state   web_url    
 
 
 A
 }
 
-# test_gcode_project_info(){
-#     local project_path="new_project"
-#     @assert stdout eval 'x gcode project info --json "$project_path" | x jo . .path'<<A
-# "$project_path"
-# A
+test_gcode_project_info(){
+    local project_path="gcode"
+    @assert stdout eval 'x gcode project info --json "$project_path" | x jo . .path'<<A
+"$project_path"
+A
 
-#     NO_COLOR=1 @assert stdout eval 'x gcode project info "$project_path" | awk '\''
-# NR==2{
-#     print match($0, " - project_id: " "[0-9]+" )
-# }
-# NR==3{
-#     print match($0, " - name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
-# }
-# NR==4{
-#     print match($0, " - default_branch:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
-# }
-# NR==5{
-#     print match($0, " - url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
-# }
-# '\'' ' << A
-# 1
-# 1
-# 1
-# 1
-# A
+    NO_COLOR=1 @assert stdout eval 'x gcode project info "$project_path" | awk '\''
+NR==2{
+    print match($0, " - project_id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - default_branch:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+'\'' ' << A
+1
+1
+1
+1
+A
 
-#     @assert stdout eval 'x gcode project info --json "err$project_path" |x jo .message'<<A
-# "404 Project Not Found"
-# A
+    @assert stdout eval 'x gcode project info --json "err$project_path" |x jo .message'<<A
+"404 Project Not Found"
+A
 
-#     NO_COLOR=1 @assert stdout x gcode project info "err$project_path"  <<A
-# X Failed to get project information.
-#  - ErrorMsg:{"message":"404 Project Not Found"}
-# A
-# }
+    NO_COLOR=1 @assert stdout x gcode project info "err$project_path"  <<A
+X Failed to get project information.
+ - ErrorMsg:{"message":"404 Project Not Found"}
+A
+}
 
 test_gcode_project_add(){
     local path="project_name"
     local visibility="private"
-    local description="gltest"
-    local project_name="gltest"
+    local description="gcodetest"
+    local project_name="gcodetest"
     @assert stdout eval "x gcode project add --json --path "$path" --visibility "$visibility" --description "$description" \
     "$project_name" | x jo . .name .path .visibility .description"<<A
 "$project_name"
@@ -144,7 +146,7 @@ A
 }
 
 test_gcode_project_edit(){
-    local project_name="gltest"
+    local project_name="gcodetest"
     local path="project_name"
     local visibility="public"
     local description="gltest"
@@ -187,13 +189,13 @@ A
 
     @assert stdout eval 'x gcode project edit --json --name "update$project_name" --visibility "$visibility" --description "update$description" \
     --default_branch "errbranch" "$path" |x jo .message'<<A
-{"base":["Could not change HEAD: branch 'errbranch' does not exist"]}
+{"base":["无法更改HEAD：分支“errbranch”不存在"]}
 A
 
     NO_COLOR=1 @assert stdout x gcode project edit --name "update$project_name" --visibility "$visibility" --description "update$description" \
     --default_branch "errbranch" "$path" <<A
 X Update failure: $path.
- - ErrorMsg:{"message":{"base":["Could not change HEAD: branch 'errbranch' does not exist"]}}
+ - ErrorMsg:{"message":{"base":["无法更改HEAD：分支“errbranch”不存在"]}}
 A
 }
 

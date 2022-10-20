@@ -7,14 +7,14 @@ test_gcode_project_tag_main(){
 
 
 test_gcode_project_tag_ls(){
-    local project_path="projects"
-    @assert stdout eval 'x gcode project tag ls --json --project "$project_path" --order_by "updated" --sort "asc" | x jo . .1.commit.author_name'<<A
-"$username"
+    local project_path="gcode"
+    @assert stdout eval 'x gcode project tag ls --json --project "$project_path" --order_by "updated" --sort "asc" | x jo . .1.name'<<A
+"master"
 A
 
     NO_COLOR=1 @assert stdout x gcode project tag ls --project "$project_path" --order_by "updated" --sort "asc" <<A
-name     commit     protected   message
-master   d5928b19   false
+name     commit     protected   message   
+master   95eabc5c   false                 
 
 
 A
@@ -24,7 +24,7 @@ A
 A
 
     NO_COLOR=1 @assert stdout x gcode project tag ls --project "$project_path" --order_by "update" --sort "asc" <<A
-name   commit   protected   message
+name   commit   protected   message   
 
 
 A
@@ -32,11 +32,10 @@ A
 
 
 test_gcode_project_tag_info(){
-    local project_path="projects"
+    local project_path="gcode"
     local tag="master"
-    @assert stdout eval 'x gcode project tag info --json --project "$project_path" "$tag" | x jo . .name .commit.author_name'<<A
+    @assert stdout eval 'x gcode project tag info --json --project "$project_path" "$tag" | x jo . .name'<<A
 "$tag"
-"$username"
 A
 
     NO_COLOR=1 @assert stdout eval 'x gcode project tag info --project "$project_path" "$tag" | awk '\''
@@ -70,13 +69,12 @@ A
 }
 
 test_gcode_project_tag_create(){
-    local project_path="projects"
-    local ref="main"
+    local project_path="gcode"
+    local ref="gcode"
     local message="gltest"
     local tag="gltest"
-    @assert stdout eval "x gcode project tag create --json --project "$project_path" --ref "$ref" --message "$message" "$tag" | x jo . .name .commit.author_name .message"<<A
+    @assert stdout eval "x gcode project tag create --json --project "$project_path" --ref "$ref" --message "$message" "$tag" | x jo . .name .message"<<A
 "$tag"
-"$username"
 "$message"
 A
 
@@ -115,7 +113,7 @@ A
 }
 
 test_gh_project_tag_rm(){
-    local project_path="projects"
+    local project_path="gcode"
     local tag="gltest"
     x gcode project tag rm -y --project "$project_path" "$tag"
     @assert stdout echo $? <<A

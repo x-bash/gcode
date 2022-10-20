@@ -7,14 +7,14 @@ test_gcode_project_member_main(){
 
 
 test_gcode_project_member_ls(){
-    local project_path="projects"
-    @assert stdout eval 'x gcode project member ls --json --project "$project_path" --query "$username" | x jo . .1.name'<<A
+    local project_path="gcode"
+    @assert stdout eval 'x gcode project member ls --json --project "$project_path" --query "$username" | x jo . .1.username'<<A
 "$username"
 A
 
-    NO_COLOR=1 @assert stdout x gcode project member ls --project "$project_path" --page "1" --per_page "10" <<A
-Id         Username     State    Access_level   web_url
-12051734   huangst798   active   50             https://gitlab.com/huangst798
+    NO_COLOR=1 @assert stdout x gcode project member ls --project "$project_path" --page "1" --per_page "1" <<A
+Id        Username   State    Access_level   web_url                        
+1145121   curryhst   active   40             https://gitcode.net/curryhst   
 
 
 A
@@ -24,7 +24,7 @@ A
 A
 
     NO_COLOR=1 @assert stdout x gcode project member ls --project "$project_path" --query "err$username" <<A
-Id   Username   State   Access_level   web_url
+Id   Username   State   Access_level   web_url   
 
 
 A
@@ -32,9 +32,9 @@ A
 
 
 test_gcode_project_member_info(){
-    local project_path="projects"
-    local user_id="12051734"
-    @assert stdout eval 'x gcode project member info --json --project "$project_path" "$user_id" | x jo . .id .name'<<A
+    local project_path="gcode"
+    local user_id="1145121"
+    @assert stdout eval 'x gcode project member info --json --project "$project_path" "$user_id" | x jo . .id .username'<<A
 $user_id
 "$username"
 A
@@ -68,7 +68,7 @@ NR==7{
 A
 
     @assert stdout eval 'x gcode project member info --json --project "$project_path" "11$user_id" |x jo .message'<<A
-"404 Not Found"
+"404 Not found"
 A
 
     NO_COLOR=1 @assert stdout x gcode project member info --project "$project_path" "11$user_id"  <<A
@@ -77,75 +77,85 @@ X Failed to get project member information.
 A
 }
 
-#TODO: bug
-# test_gcode_project_member_add(){
-#     local project_path="projects"
-#     local tasks_to_be_done="gltest"
-#     local tasks_project_id="gltest"
-#     local expires_at="2022-10-17"
-#     @assert stdout eval "x gcode project member add --json --project "$project_path" --access_level "5" --expires_at "$expires_at" \
-#     --tasks_project_id "$tasks_project_id" --tasks_to_be_done "$tasks_to_be_done" "$member" | x jo . .name .commit.author_name .message"<<A
-# "$member"
-# "$username"
-# "$message"
-# A
+test_gcode_project_member_add(){
+    local member_id="5055"
+    local member_uid="5056"
+    local project_path="gcode"
+    local tasks_to_be_done="gltest"
+    local expires_at="2022-10-25"
+    local access_level="10"
+    @assert stdout eval "x gcode project member add --json --project "$project_path" --access_level "$access_level" --expires_at "$expires_at" \
+    --tasks_to_be_done "$tasks_to_be_done" "$member_id" | x jo . .id"<<A
+$member_id
+A
 
-#     NO_COLOR=1 @assert stdout eval 'x gcode project member add --project "$project_path" --access_level "$access_level" --expires_at "$expires_at" \
-#     --tasks_project_id "$tasks_project_id" --tasks_to_be_done "$tasks_to_be_done" "$member" | awk '\''
-# NR==2{
-#     print match($0, " - Name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
-# }
-# NR==3{
-#     print match($0, " - Commit:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
-# }
-# NR==4{
-#     print match($0, " - Release:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
-# }
-# NR==5{
-#     print match($0, " - Protected:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
-# }
-# NR==6{
-#     print match($0, " - Message:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
-# }
-# '\'' ' << A
-# 1
-# 1
-# 1
-# 1
-# 1
-# A
+    NO_COLOR=1 @assert stdout eval 'x gcode project member add --project "$project_path" --access_level "$access_level" --expires_at "$expires_at" \
+    --tasks_to_be_done "$tasks_to_be_done" "$member_uid" | awk '\''
+NR==2{
+    print match($0, " - User_id: " "[0-9]+" )
+}
+NR==3{
+    print match($0, " - Name:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==4{
+    print match($0, " - Username:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==5{
+    print match($0, " - State:" " [A-Za-z0-9]{1}[A-Za-z0-9_-]+{1,37}[A-Za-z0-9]{1}" )
+}
+NR==6{
+    print match($0, " - Access_level:" "[0-9]+" )
+}
+NR==7{
+    print match($0, " - Url: (https)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[.][a-z][a-z][a-z]?[a-z]?[a-z]?[a-z]?(/[-A-Za-z0-9+&@#/%=~_|]*)?" )
+}
+'\'' ' << A
+1
+1
+1
+1
+1
+1
+A
 
-#     @assert stdout eval 'x gcode project member add --json --project "$project_path" --ref "err$ref" --message "$message" "$member" |x jo .message'<<A
-# "Target err$ref is invalid"
-# A
+    @assert stdout eval 'x gcode project member add --json --project "$project_path" --access_level "$access_level" --expires_at "$expires_at" \
+    --tasks_to_be_done "$tasks_to_be_done" "1111$member_id" |x jo .message'<<A
+"404 User Not Found"
+A
 
-#     NO_COLOR=1 @assert stdout x gcode project member add --project "$project_path" --ref "err$ref" --message "$message" "$member" <<A
-# X Failed to get project member information
-#  - ErrorMsg:{"message":"Target err$ref is invalid"}
-# A
-# }
+    NO_COLOR=1 @assert stdout x gcode project member add --project "$project_path" --access_level "$access_level" --expires_at "$expires_at" \
+    --tasks_to_be_done "$tasks_to_be_done" "1111$member_id" <<A
+X Failed to add user to $project_path project.
+ - ErrorMsg:{"message":"404 User Not Found"}
+A
+}    
+    
+    NO_COLOR=1 @assert stdout x gcode project member rm -y --project "$project_path" "$member_uid" <<A
+✔ Remove $member_uid successfully.
+A
 
-# test_gh_project_member_rm(){
-#     local project_path="projects"
-#     local user_id="12804278"
-#     x gcode project member rm -y --project "$project_path" "$user_id"
-#     @assert stdout echo $? <<A
-# 0
-# A
+test_gh_project_member_rm(){
+    local member_id="5055"
+    local member_uid="5056"
+    local project_path="gcode"
+    x gcode project member rm -y --project "$project_path" "$member_id"
+    @assert stdout echo $? <<A
+0
+A
 
-# #     NO_COLOR=1 @assert stdout x gcode project member rm -y --project "$project_path" "user_id" <<A
-# # ✔ Remove user_id successfully.
-# # A
+    NO_COLOR=1 @assert stdout x gcode project member rm -y --project "$project_path" "$member_uid" <<A
+✔ Remove $member_uid successfully.
+A
 
-#     x gcode project member rm -y --project "$project_path" "11$member"
-#     @assert stdout echo $? <<A
-# 1
-# A
+    x gcode project member rm -y --project "$project_path" "11$member"
+    @assert stdout echo $? <<A
+1
+A
 
-#     NO_COLOR=1 @assert stdout x gcode project member rm -y --project "$project_path" "11$member" <<A
-# X Remove 11$member failure
-# A
-# }
+    NO_COLOR=1 @assert stdout x gcode project member rm -y --project "$project_path" "11$member" <<A
+X Remove 11$member failure
+A
+}
 
 
 # @assert:file:func
