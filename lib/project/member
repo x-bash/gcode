@@ -122,6 +122,8 @@ options:
     --project               "The URL-encoded path of the project."          <>:address
     --skip_subresources     ""
     --unassign_issuables    ""
+    --yes|-y                "Ignore remove prompt interception"
+
 '
     param:run
 

@@ -32,7 +32,7 @@ options:
 
      local ___gcode_error_msg="get groups list fail"
     ___X_CMD_UI_STATIC=1 ___gcode_ui_mutual '___ui_table_json Id=.id Username=.username Web_url=.web_url State=.state -- $@' \
-        ___x_cmd_gcode_get_multi "/groups/$id/members" query user_ids
+        ___x_cmd_gcode_get_multi "/groups/$1/members" query user_ids
 }
 
 # shellcheck disable=SC2154

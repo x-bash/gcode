@@ -55,7 +55,7 @@ options:
  param:run
 
     ___X_CMD_UI_STATIC=1 ___gcode_ui_mutual '___ui_table_json Id=.id iid=.iid project_id=.project_id title=.title state=.state web_url=.web_url -- $@' \
-        ___x_cmd_gcode_get_multi "/issues" sort order_by search state
+        ___x_cmd_gcode_get_multi "/issues" sort order_by search state milestone_id
 }
 # EndSection
 

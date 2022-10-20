@@ -4,35 +4,35 @@
 
 
 test_gcode_groups_member_ls(){
-    local id="58891286"
+    local id="1186728"
     local username
     username="$(x gcode current owner)"
     @assert stdout eval 'x gcode groups member ls --query "$username" --json "$id" | x jo . .1.username'<<A
 "$username"
 A
-#TODO:
-#     NO_COLOR=1 @assert stdout x gcode groups member ls --query "$username" "$id" <<A
-# Id         Username     Web_url                         State
-# 12051734   huangst798   https://gitlab.com/huangst798   active
+
+    NO_COLOR=1 @assert stdout x gcode groups member ls --query "$username" "$id" <<A
+Id        Username   Web_url                        State    
+1145121   curryhst   https://gitcode.net/curryhst   active   
 
 
-# A
+A
 
     @assert stdout x gcode groups member ls --query "err$username" --json "$id" <<A
 []
 A
 
-#     NO_COLOR=1 @assert stdout x gcode groups member ls --query "err$username" "$id" <<A
-# Id   Username   web_url   State
+    NO_COLOR=1 @assert stdout x gcode groups member ls --query "err$username" "$id" <<A
+Id   Username   Web_url   State   
 
 
-# A
+A
 }
 
 
 test_gcode_groups_member_user(){
-    local id="58891286"
-    local user_id="12051734"
+    local id="1186728"
+    local user_id="1145121"
     @assert stdout eval 'x gcode groups member user --user_id "$user_id" --json "$id" | x jo . .id'<<A
 $user_id
 A
@@ -64,11 +64,11 @@ A
 }
 
 test_gcode_groups_member_add(){
-    local id="58891286"
-    local user_id="120517"
-    local User_id="1205173"
+    local id="1186728"
+    local user_id="5056"
+    local User_id="5055"
     local user_Id="12323"
-    local expires_at="2022-10-10"
+    local expires_at="2022-10-25"
     local access_level=30
     @assert stdout eval "x gcode groups member add --json --id "$id" --expires_at "$expires_at" --access_level "$access_level" \
     "$user_id" | x jo . .id .access_level .expires_at"<<A
@@ -97,21 +97,21 @@ NR==5{
 1
 A
 
-    @assert stdout eval 'x gcode groups member add --json --id "$id" --expires_at "$expires_at" --access_level "1$access_level" "$user_Id" |x jo .message'<<A
-{"access_level":["is not included in the list"]}
+    @assert stdout eval 'x gcode groups member add --json --id "$id" --expires_at "$expires_at" --access_level "$access_level" "11111$user_Id" |x jo .message'<<A
+"404 User Not Found"
 A
 
-    NO_COLOR=1 @assert stdout x gcode groups member add --id "$id" --expires_at "$expires_at" --access_level "1$access_level" "$user_Id" <<A
+    NO_COLOR=1 @assert stdout x gcode groups member add --id "$id" --expires_at "$expires_at" --access_level "$access_level" "11111$user_Id" <<A
 X Add user failure.
- - ErrorMsg:{"message":{"access_level":["is not included in the list"]}}
+ - ErrorMsg:{"message":"404 User Not Found"}
 A
 }
 
 test_gcode_groups_member_update(){
-    local id="58891286"
-    local user_id="120517"
-    local User_id="1205173"
-    local expires_at="2022-10-10"
+    local id="1186728"
+    local user_id="5056"
+    local User_id="5055"
+    local expires_at="2022-10-25"
     local access_level=40
     @assert stdout eval "x gcode groups member update --json --id "$id" --expires_at "$expires_at" --access_level "$access_level" --user_id "$user_id" | x jo . .id .access_level .expires_at"<<A
 $user_id
@@ -139,22 +139,22 @@ NR==5{
 1
 A
 
-    @assert stdout eval 'x gcode groups member update --json --id "$id" --expires_at "$expires_at" --access_level "1$access_level" --user_id "$user_id" |x jo .message'<<A
-{"access_level":["is not included in the list"]}
+    @assert stdout eval 'x gcode groups member update --json --id "$id" --expires_at "$expires_at" --access_level "$access_level" --user_id "1111$user_id" |x jo .message'<<A
+"404 Not found"
 A
 
-    NO_COLOR=1 @assert stdout x gcode groups member update --id "$id" --expires_at "$expires_at" --access_level "1$access_level" --user_id "$user_id" <<A
+    NO_COLOR=1 @assert stdout x gcode groups member update --id "$id" --expires_at "$expires_at" --access_level "$access_level" --user_id "1111$user_id" <<A
 X Update user failure.
- - ErrorMsg:{"message":{"access_level":["is not included in the list"]}}
+ - ErrorMsg:{"message":"404 Not found"}
 A
 }
 
 
 
 test_gh_groups_member_rm(){
-    local id="58891286"
-    local user_id="120517"
-    local User_id="1205173"
+    local id="1186728"
+    local user_id="5056"
+    local User_id="5055"
     x gcode groups member rm -y --id "$id" "$user_id"
     @assert stdout echo $? <<A
 0
@@ -164,12 +164,12 @@ A
 ✔ del member $User_id successfully.
 A
 
-    x gcode groups member rm -y --id "$id" --user_id "$user_id"
+    x gcode groups member rm -y --id "$id" "$user_id"
     @assert stdout echo $? <<A
 1
 A
 
-    NO_COLOR=1 @assert stdout x gcode groups member rm -y --id "$id" --user_id "$user_id" <<A
+    NO_COLOR=1 @assert stdout x gcode groups member rm -y --id "$id" "$user_id" <<A
 X del member $user_id failure.
 A
 }

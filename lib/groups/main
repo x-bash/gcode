@@ -77,7 +77,7 @@ options:
     #1                          "The ID or URL-encoded path of the group of the immediate parent group" <>
     --sort                      "Order groups in asc or desc order."                                    <>=""
     --search                    "Return the list of authorized groups matching the search criteria"     <>=""
-    --order_by                  "Order groups by"                                                       <>=""
+    --order_by                  "Order groups by name, path or id. Default is name"                     <>=""
     --skip_groups               "Skip the group IDs passed"                                             <>=""
     --min_access_level          "Limit to groups where current user has at least this access level"     <>:Number=""
     --owned                     "Limit to groups explicitly owned by the current user"
@@ -295,7 +295,7 @@ options:
 
     local ___gcode_error_msg="get issues list fail"
     ___X_CMD_UI_STATIC=1 ___gcode_ui_mutual '___ui_table_json Id=.id iid=.iid project_id=.project_id title=.title state=.state web_url=.web_url -- $@' \
-        ___x_cmd_gcode_get_multi "/groups/$id/issues" sort order_by search state author_username
+        ___x_cmd_gcode_get_multi "/groups/$id/issues" sort order_by search state author_username milestone_id
 }
 
 _____x_cmd_groups_ui_utils()(
