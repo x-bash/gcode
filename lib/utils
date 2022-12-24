@@ -147,10 +147,10 @@ ___x_cmd_gcode_param_normalize_repo(){
         ;;
     *)
         ___x_cmd_gcode_current_owner 1>/dev/null
-        if [ -z "$___X_CMD_GL_DEFAULT_OWNER" ]; then
+        if [ -z "$___X_CMD_GCODE_DEFAULT_OWNER" ]; then
             printf "No owner provided. Default owner not set.\n" >&2
         fi
-        owner_project="$(printf "%s" "$___X_CMD_GL_DEFAULT_OWNER/$op")"
+        owner_project="$(printf "%s" "$___X_CMD_GCODE_DEFAULT_OWNER/$op")"
         ;;
     esac
     owner_project="$(printf "%s" "$owner_project" | sed s:'/':'%2F':g)"
