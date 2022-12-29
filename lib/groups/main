@@ -3,7 +3,7 @@
 
 # define lazy loader
 # ___x_cmd_definelazyloader   ___x_cmd_gcode_groups_member           gcode/lib/groups/member
-
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html
 ___x_cmd_gcode_groups(){
     param:scope     ___x_cmd_gcode
     param:subcmd ___x_cmd_gcode_groups                                                 \
@@ -14,7 +14,7 @@ ___x_cmd_gcode_groups(){
         update                  "Update group"                                      \
         issue                   "groups issue list"                                 \
         repo                    "group repo mange"                                  \
-        rm                      "remove group"
+        rm                      "Remove group"
     param:subcmd:try
     param:run
 
@@ -23,6 +23,7 @@ ___x_cmd_gcode_groups(){
     return 1
 }
 
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html
 ___x_cmd_gcode_subgroup(){
     param:scope     ___x_cmd_gcode
     param:subcmd ___x_cmd_gcode_subgroup                   \
@@ -39,6 +40,7 @@ ___x_cmd_gcode_subgroup(){
 # Section: list & info
 # shellcheck disable=SC2154
 # skip_groups  正则	array of integers
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html#list-groups
 ___x_cmd_gcode_groups_ls(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -67,6 +69,7 @@ options:
         ___x_cmd_gcode_get_multi "/groups" sort search order_by per_page page skip_groups search min_access_level
 }
 
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html#list-a-groups-subgroups
 ___x_cmd_gcode_subgroup_ls(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -96,6 +99,7 @@ options:
 }
 
 # shellcheck disable=SC2154
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html#details-of-a-group
 ___x_cmd_gcode_groups_info(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -115,6 +119,7 @@ options:
 # Section: create
 # shellcheck disable=SC2181
 # TODO:On gcode SaaS, you must use the gcode UI to create groups without a parent group. You cannot use the API to do this.???
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html#new-group
 ___x_cmd_gcode_groups_create(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -141,6 +146,7 @@ options:
 # Section: create subgroup
 # shellcheck disable=SC2181
 # TODO:On gcode SaaS, you must use the gcode UI to create groups without a parent group. You cannot use the API to do this.???
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html#new-subgroup
 ___x_cmd_gcode_subgroup_create(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -160,6 +166,7 @@ options:
 # EndSection
 
 # Section:groups update
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html#update-group
 ___x_cmd_gcode_groups_update(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -184,7 +191,7 @@ options:
     ___x_cmd_gcode_curl put "/groups/$1" "gen_gcode_json" | _____x_cmd_groups_ui_utils Update
 }
 # EndSection
-
+# https://archives.docs.gitlab.com/13.2/ee/api/groups.html#remove-group
 ___x_cmd_gcode_groups_rm(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -233,6 +240,7 @@ ___x_cmd_gcode_groups_repo(){
     return 1
 }
 
+# https://archives.docs.gitlab.com/13.2/ee/api/repositories.html#list-repository-tree
 ___x_cmd_gcode_groups_repo_ls(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -256,6 +264,7 @@ options:
 
 
 # Section: groups issue ls
+# https://archives.docs.gitlab.com/13.2/ee/api/group_boards.html
 ___x_cmd_gcode_groups_issue(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
