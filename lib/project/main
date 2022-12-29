@@ -1,7 +1,7 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
 # shellcheck disable=SC2154
-
+# https://archives.docs.gitlab.com/13.2/ee/api/projects.html
 ___x_cmd_gcode_project(){
     param:scope         ___x_cmd_gcode
     param:subcmd ___x_cmd_gcode_project                            \
@@ -24,6 +24,7 @@ ___x_cmd_gcode_project(){
 }
 
 # Section: create
+# https://archives.docs.gitlab.com/13.2/ee/api/projects.html#create-project
 ___x_cmd_gcode_project_add(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -109,6 +110,7 @@ option:
 }
 
 # shellcheck disable=SC2154
+# https://archives.docs.gitlab.com/13.2/ee/api/projects.html#create-project-for-user
 ___x_cmd_gcode_project_create_status_handler(){
     if [ ! -t 1 ] || [ -n "$ENFORCE_JSON" ]; then
         cat
@@ -126,6 +128,7 @@ ___x_cmd_gcode_project_create_status_handler(){
 # EndSection
 
 # Section: list
+# https://archives.docs.gitlab.com/13.2/ee/api/projects.html#list-user-projects
 ___x_cmd_gcode_project_ls(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -142,6 +145,7 @@ options:
 # EndSection
 
 # Section: edit
+# https://archives.docs.gitlab.com/13.2/ee/api/projects.html#edit-project
 ___x_cmd_gcode_project_edit(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -226,6 +230,7 @@ options:
 # EndSection
 
 # Section: info
+# https://archives.docs.gitlab.com/13.2/ee/api/projects.html#get-single-project
 ___x_cmd_gcode_project_info(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -247,6 +252,7 @@ options:
 # EndSection
 
 # Section: del
+# https://archives.docs.gitlab.com/13.2/ee/api/projects.html#remove-project
 ___x_cmd_gcode_project_rm(){
     param:scope     ___x_cmd_gcode
     param:dsl       '

@@ -1,5 +1,6 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043,SC2034
+# https://archives.docs.gitlab.com/13.2/ee/api/tags.html
 ___x_cmd_gcode_project_tag(){
     param:subcmd ___x_cmd_gcode_project_tag                \
         ls              "List project member"           \
@@ -14,6 +15,7 @@ ___x_cmd_gcode_project_tag(){
     return 1
 }
 # Section: tag ls
+# https://archives.docs.gitlab.com/13.2/ee/api/tags.html#list-project-repository-tags
 ___x_cmd_gcode_project_tag_ls(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -34,6 +36,7 @@ options:
 # EndSection
 
 # Section: info
+# https://archives.docs.gitlab.com/13.2/ee/api/tags.html#get-a-single-repository-tag
 ___x_cmd_gcode_project_tag_info(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -49,6 +52,7 @@ options:
 }
 # EndSection
 
+# https://archives.docs.gitlab.com/13.2/ee/api/tags.html#create-a-new-tag
 ___x_cmd_gcode_project_tag_create(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -70,6 +74,7 @@ options:
     ___x_cmd_gcode_curl post "/projects/$owner_project/repository/tags" gen_gcode_json | _____x_cmd_gcode_project_tag_ui_utils Create
 }
 
+# https://archives.docs.gitlab.com/13.2/ee/api/tags.html#delete-a-tag
 ___x_cmd_gcode_project_tag_rm(){
     param:scope     ___x_cmd_gcode
     param:dsl       '

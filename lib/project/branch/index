@@ -1,5 +1,6 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043
+# https://archives.docs.gitlab.com/13.2/ee/api/protected_branches.html#protect-repository-branches
 ___x_cmd_gcode_project_branch(){
     param:subcmd ___x_cmd_gcode_project_branch             \
         "ls|l"              "list repo branch"          \
@@ -14,6 +15,7 @@ ___x_cmd_gcode_project_branch(){
 }
 
 # Section:list & info
+# https://archives.docs.gitlab.com/13.2/ee/api/branches.html#list-repository-branches
 ___x_cmd_gcode_project_branch_ls(){
     param:scope     ___x_cmd_github
     param:dsl       '
@@ -33,6 +35,7 @@ options:
          ___x_cmd_gcode_get_multi "/projects/$owner_project/repository/branches" search
 }
 
+# https://archives.docs.gitlab.com/13.2/ee/api/branches.html#get-single-repository-branch
 ___x_cmd_gcode_project_branch_info(){
     param:scope     ___x_cmd_github
     param:dsl       '
