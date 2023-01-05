@@ -15,7 +15,7 @@ ___x_cmd_gcode_project_branch(){
 }
 
 # Section:list & info
-# https://archives.docs.gitlab.com/13.2/ee/api/branches.html#list-repository-branches
+# https://archives.docs.gitlab.com/13.2/ee/api/branches.html#list-repository-branches 
 ___x_cmd_gcode_project_branch_ls(){
     param:scope     ___x_cmd_github
     param:dsl       '
