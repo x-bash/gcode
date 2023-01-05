@@ -1,6 +1,6 @@
 # shellcheck shell=sh
 # shellcheck disable=SC2039,3043,2034
-
+# https://archives.docs.gitlab.com/13.2/ee/api/issues.html
 ___x_cmd_gcode_issue(){
     param:scope         ___x_cmd_gcode
     param:subcmd ___x_cmd_gcode_issue              \
@@ -17,6 +17,7 @@ ___x_cmd_gcode_issue(){
 }
 
 # Section: List
+# https://archives.docs.gitlab.com/13.2/ee/api/issues.html#list-issues
 ___x_cmd_gcode_issue_ls(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -60,6 +61,7 @@ options:
 # EndSection
 
 # Section: Create
+# https://archives.docs.gitlab.com/13.2/ee/api/issues.html#new-issue
 ___x_cmd_gcode_issue_create(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -95,6 +97,7 @@ options:
 # EndSection
 
 # Section: update
+# https://archives.docs.gitlab.com/13.2/ee/api/issues.html#edit-issue
 ___x_cmd_gcode_issue_update(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -131,6 +134,7 @@ options:
 # EndSection
 
 # Section: rm
+# https://archives.docs.gitlab.com/13.2/ee/api/issues.html#delete-an-issue
 ___x_cmd_gcode_issue_rm(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
@@ -159,6 +163,7 @@ options:
 
 # Section: project issue ls
 # TODO: order_by type: created_at,due_date,label_priority,milestone_due,popularity,priority,relative_position,title, updated_at,or weight
+# https://archives.docs.gitlab.com/13.2/ee/api/issues.html#list-project-issues
 ___x_cmd_gcode_project_issue(){
     param:scope     ___x_cmd_gcode
     param:dsl       '
